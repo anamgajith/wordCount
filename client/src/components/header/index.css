@@ -21,8 +21,11 @@
   max-height: 75%;
 }
 
-.profile{
-    max-height: 40%;
+.sign-out {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
 }
 
 .header-content button {
