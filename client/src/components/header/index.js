@@ -6,7 +6,6 @@ import { FaSignOutAlt } from "react-icons/fa";
 import "./index.css";
 const Header = ({ history }) => {
   const { loginWithRedirect, user, isAuthenticated, logout } = useAuth0();
-  console.log(user);
   return (
     <div className="header-container">
       <div className="header-content">

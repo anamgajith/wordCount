@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ColumnDirective,
   ColumnsDirective,
@@ -7,53 +7,147 @@ import {
   Sort,
   Inject,
 } from "@syncfusion/ej2-react-grids";
-import { BsStar, BsTrash } from "react-icons/bs";
+import { BsStar, BsStarFill, BsTrash } from "react-icons/bs";
+import { withRouter } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Loading } from "../../components";
+import axios from "axios";
 import "./index.css";
-const DATA = [
-  {
-    id: 1,
-    url: "www.google.com",
-    wordCount: 124,
-  },
-  {
-    id: 2,
-    url: "www.google.com",
-    wordCount: 220,
-  },
-  {
-    id: 3,
-    url: "www.google.com",
-    wordCount: 184,
-  },
-  {
-    id: 4,
-    url: "www.google.com",
-    wordCount: 458,
-  },
-  {
-    id: 5,
-    url: "www.google.com",
-    wordCount: 365,
-  },
-];
-const DashBoard = () => {
-  const actions = (props) => (
-    <dvi className="grid-action-container">
-      <BsStar className="clickable" />
-      <BsTrash className="clickable" />
-    </dvi>
-  );
-  return (
+
+const DashBoard = ({ location, history }) => {
+  const [historyData, setHistoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [count, setCount] = useState(0);
+
+  const { url } = location;
+  const { user } = useAuth0();
+  const uid = user && user.sub;
+
+  const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  const addHistory = async (newHistory) => {
+    try {
+      await axios.post("addHistory", newHistory);
+    } catch (error) {
+      console.error(error);
+      alert("Sorry Something Went Wrong");
+      history.push("/");
+    }
+  };
+
+  const fetchHistory = async () => {
+    try {
+      const response = await axios.post("getHistory", { uid });
+      setHistoryData(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("Sorry Something Went Wrong");
+      history.push("/");
+    }
+  };
+
+  const updateHistory = async (historyId, updatedHistory) => {
+    try {
+      setLoading(true);
+      await axios.patch("upateHistory", {
+        uid,
+        historyId,
+        updatedHistory,
+      });
+      await fetchHistory();
+    } catch (error) {
+      console.error(error);
+      alert("Sorry Something Went Wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteHistoryData = async (historyId) => {
+    try {
+      setLoading(true);
+      await axios.delete("deleteHistory", {
+        data: {
+          uid,
+          historyId,
+        },
+      });
+      await fetchHistory();
+    } catch (error) {
+      console.error(error);
+      alert("Sorry Something Went Wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const setFavorite = async (id, isFavorite) => {
+    try {
+      await updateHistory(id, { isFavorite: !isFavorite });
+    } catch (error) {
+      console.error(error);
+      alert("Sorry Something Went Wrong");
+    }
+  };
+
+  useEffect(() => {
+    async function initialLoad() {
+      const wordCount = getRandomInt(90, 999);
+      setCount(wordCount);
+      const newHistory = {
+        uid,
+        newHistory: {
+          wordCount,
+          time: new Date(),
+          url,
+          isFavorite: false,
+        },
+      };
+      await addHistory(newHistory);
+      await fetchHistory();
+      setLoading(false);
+    }
+    initialLoad();
+  }, []);
+
+  const actions = ({ _id, isFavorite }) => {
+    return (
+      <div className="grid-action-container">
+        {isFavorite && (
+          <BsStarFill
+            color="yellow"
+            className="clickable"
+            onClick={() => setFavorite(_id, isFavorite)}
+          />
+        )}
+        {!isFavorite && (
+          <BsStar
+            className="clickable"
+            onClick={() => setFavorite(_id, isFavorite)}
+          />
+        )}
+        <BsTrash className="clickable" onClick={() => deleteHistoryData(_id)} />
+      </div>
+    );
+  };
+
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="dashboard-container">
       <div className="dashboard-dropdown-menu">
         <select>
-          <option>growth.cx</option>
+          <option>{url}</option>
         </select>
       </div>
       <div className="dashboard-count-container">
         <div className="dashboard-count">
           <div className="dashboard-count-title">Total Word Count</div>
-          <div className="dashboard-count-number">100</div>
+          <div className="dashboard-count-number">{count}</div>
         </div>
         <div className="dashboard-count-message">
           "WooHoo! You’re doing a good job!"
@@ -62,7 +156,7 @@ const DashBoard = () => {
       <div className="dashboard-history-container">
         <div className="dashboard-history-title">Word Count History</div>
         <GridComponent
-          dataSource={DATA}
+          dataSource={historyData}
           allowPaging={true}
           allowSorting={true}
           pageSettings={{ pageSize: 10 }}
@@ -94,4 +188,4 @@ const DashBoard = () => {
   );
 };
 
-export default DashBoard;
+export default withRouter(DashBoard);

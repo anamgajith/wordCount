@@ -24,9 +24,9 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.get("/:uid/getHistory", async (req, res) => {
+app.post("/getHistory", async (req, res) => {
   try {
-    const { uid } = req.params;
+    const { uid } = req.body;
     const result = await getHistory(client, uid);
     res.send(result || []);
   } catch (error) {
