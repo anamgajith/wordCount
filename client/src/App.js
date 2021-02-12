@@ -5,7 +5,7 @@ import { Header } from "./components";
 import { HomePage, Dashboard } from "./pages";
 import { useAuth0 } from "@auth0/auth0-react";
 function App() {
-  const { user, isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated } = useAuth0();
   return (
     <div className="App">
       <Header isAuthenticated={isAuthenticated} />
