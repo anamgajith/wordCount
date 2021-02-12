@@ -24,8 +24,14 @@ const DashBoard = ({ location, history }) => {
   const uid = user && user.sub;
 
   const getWordCount = async () => {
-    const response = await axios.post("getWordCount", { url });
-    return response.data && response.data.wordCount;
+    try {
+      const response = await axios.post("getWordCount", { url });
+      return response.data && response.data.wordCount;
+    } catch (error) {
+      console.error(error);
+      alert("Sorry Something Went Wrong");
+      history.push("/");
+    }
   };
 
   const getNumberString = (number) => {

@@ -68,9 +68,10 @@ app.delete("/deleteHistory", async (req, res) => {
 
 app.post("/getWordCount", async (req, res) => {
   try {
-    const { url } = req.body;
+    var { url } = req.body;
+    url = url.toLowerCase();
     if (!/^https?:\/\//i.test(url)) {
-      url = "http://" + url;
+      url = "https://" + url;
     }
     const wc = await getWordCount(url);
     res.send({ wordCount: wc });
@@ -127,6 +128,10 @@ async function deleteHistory(client, uid, historyId) {
 }
 
 async function getWordCount(url) {
-  const response = await axios.get(url);
-  return wordCount(response.data);
+  try {
+    const response = await axios.get(url);
+    return wordCount(response.data);
+  } catch (error) {
+    console.log(error);
+  }
 }
