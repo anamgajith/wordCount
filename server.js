@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
+const axios = require("axios");
+var wordCount = require("html-word-count");
 const { MongoClient, ObjectId } = require("mongodb");
 
 if (process.env.NODE_ENV !== "production") require("dotenv").config();
@@ -64,6 +66,16 @@ app.delete("/deleteHistory", async (req, res) => {
   }
 });
 
+app.post("/getWordCount", async (req, res) => {
+  try {
+    const { url } = req.body;
+    const wc = await getWordCount(url);
+    res.send({ wordCount: wc });
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 app.listen(port, async (error) => {
   if (error) {
     console.log(error);
@@ -109,4 +121,9 @@ async function deleteHistory(client, uid, historyId) {
     .db(uid)
     .collection("history")
     .deleteOne({ _id: historyId });
+}
+
+async function getWordCount(url) {
+  const response = await axios.get(url);
+  return wordCount(response.data);
 }

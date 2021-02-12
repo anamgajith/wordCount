@@ -23,10 +23,21 @@ const DashBoard = ({ location, history }) => {
   const { user } = useAuth0();
   const uid = user && user.sub;
 
-  const getRandomInt = (min, max) => {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  const getWordCount = async () => {
+    const response = await axios.post("getWordCount", { url });
+    return response.data && response.data.wordCount;
+  };
+
+  const getNumberString = (number) => {
+    if (number < 1000) {
+      return number;
+    } else if (number < 1000000) {
+      return `${number / 1000}K`;
+    } else if (number < 1000000000) {
+      return `${number / 1000000}M`;
+    } else {
+      return `${number / 1000000000}B`;
+    }
   };
 
   const addHistory = async (newHistory) => {
@@ -96,7 +107,7 @@ const DashBoard = ({ location, history }) => {
 
   useEffect(() => {
     async function initialLoad() {
-      const wordCount = getRandomInt(90, 999);
+      const wordCount = await getWordCount();
       setCount(wordCount);
       const newHistory = {
         uid,
@@ -147,7 +158,7 @@ const DashBoard = ({ location, history }) => {
       <div className="dashboard-count-container">
         <div className="dashboard-count">
           <div className="dashboard-count-title">Total Word Count</div>
-          <div className="dashboard-count-number">{count}</div>
+          <div className="dashboard-count-number">{getNumberString(count)}</div>
         </div>
         <div className="dashboard-count-message">
           "WooHoo! You’re doing a good job!"
