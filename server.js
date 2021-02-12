@@ -69,6 +69,9 @@ app.delete("/deleteHistory", async (req, res) => {
 app.post("/getWordCount", async (req, res) => {
   try {
     const { url } = req.body;
+    if (!/^https?:\/\//i.test(url)) {
+      url = "http://" + url;
+    }
     const wc = await getWordCount(url);
     res.send({ wordCount: wc });
   } catch (error) {
