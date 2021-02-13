@@ -27,10 +27,6 @@ const DashBoard = ({ location, history }) => {
     try {
       const response = await axios.post("getWordCount", { url });
       const wc = response.data && response.data.wordCount;
-      if (wc === undefined) {
-        alert("Sorry Website Does Not Exist");
-        history.push("/");
-      }
       return wc;
     } catch (error) {
       console.error(error);
@@ -120,17 +116,22 @@ const DashBoard = ({ location, history }) => {
     async function initialLoad() {
       if (url !== undefined) {
         const wordCount = await getWordCount();
-        setCount(wordCount);
-        const newHistory = {
-          uid,
-          newHistory: {
-            wordCount,
-            time: new Date(),
-            url,
-            isFavorite: false,
-          },
-        };
-        await addHistory(newHistory);
+        if (wordCount === undefined) {
+          alert("Sorry Website Does Not Exist");
+          history.push("/");
+        } else {
+          setCount(wordCount);
+          const newHistory = {
+            uid,
+            newHistory: {
+              wordCount,
+              time: new Date(),
+              url,
+              isFavorite: false,
+            },
+          };
+          await addHistory(newHistory);
+        }
       }
       await fetchHistory();
       setLoading(false);
