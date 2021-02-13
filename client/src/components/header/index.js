@@ -2,7 +2,6 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import logo from "../../assets/logo.svg";
 import { useAuth0 } from "@auth0/auth0-react";
-import { FaSignOutAlt } from "react-icons/fa";
 import "./index.css";
 const Header = ({ history }) => {
   const { loginWithRedirect, user, isAuthenticated, logout } = useAuth0();
@@ -24,14 +23,24 @@ const Header = ({ history }) => {
             Login
           </button>
         </div>
-        <div
-          className="sign-out clickable"
-          onClick={() => logout({ returnTo: window.location.origin })}
-          style={isAuthenticated ? { display: "flex" } : { display: "none" }}
-        >
-          <FaSignOutAlt size={25} />
-          <p>Sign Out</p>
-        </div>
+        {isAuthenticated && (
+          <div>
+            <button
+              style={{ backgroundColor: "white", color: "#0D8BFC" }}
+              onClick={() => {
+                history.push("/dashboard");
+              }}
+            >
+              Dashboard
+            </button>
+            <button
+              style={{ backgroundColor: "#0D8BFC", color: "white" }}
+              onClick={() => logout({ returnTo: window.location.origin })}
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

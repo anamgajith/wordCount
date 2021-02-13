@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { withRouter } from "react-router-dom";
 import Office from "../../assets/office.svg";
@@ -17,7 +17,7 @@ const HomePage = ({ history }) => {
       });
     }
   };
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
   return isLoading ? (
     <Loading />
   ) : (
@@ -52,7 +52,13 @@ const HomePage = ({ history }) => {
       )}
       {!isAuthenticated && (
         <>
-          <div className="text-regular">Please login to continue.</div>
+          <div className="text-regular">
+            Please{" "}
+            <b className="clickable" style={{ color: "#0d8bfc" }} onClick={() => loginWithRedirect()}>
+              Login
+            </b>{" "}
+            to continue.
+          </div>
         </>
       )}
     </div>

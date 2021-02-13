@@ -26,7 +26,12 @@ const DashBoard = ({ location, history }) => {
   const getWordCount = async () => {
     try {
       const response = await axios.post("getWordCount", { url });
-      return response.data && response.data.wordCount;
+      const wc = response.data && response.data.wordCount;
+      if (wc === undefined) {
+        alert("Sorry Website Does Not Exist");
+        history.push("/");
+      }
+      return wc;
     } catch (error) {
       console.error(error);
       alert("Sorry Something Went Wrong");
@@ -113,18 +118,20 @@ const DashBoard = ({ location, history }) => {
 
   useEffect(() => {
     async function initialLoad() {
-      const wordCount = await getWordCount();
-      setCount(wordCount);
-      const newHistory = {
-        uid,
-        newHistory: {
-          wordCount,
-          time: new Date(),
-          url,
-          isFavorite: false,
-        },
-      };
-      await addHistory(newHistory);
+      if (url !== undefined) {
+        const wordCount = await getWordCount();
+        setCount(wordCount);
+        const newHistory = {
+          uid,
+          newHistory: {
+            wordCount,
+            time: new Date(),
+            url,
+            isFavorite: false,
+          },
+        };
+        await addHistory(newHistory);
+      }
       await fetchHistory();
       setLoading(false);
     }
@@ -156,20 +163,26 @@ const DashBoard = ({ location, history }) => {
     <Loading />
   ) : (
     <div className="dashboard-container">
-      <div className="dashboard-dropdown-menu">
-        <select>
-          <option>{url}</option>
-        </select>
-      </div>
-      <div className="dashboard-count-container">
-        <div className="dashboard-count">
-          <div className="dashboard-count-title">Total Word Count</div>
-          <div className="dashboard-count-number">{getNumberString(count)}</div>
-        </div>
-        <div className="dashboard-count-message">
-          "WooHoo! You’re doing a good job!"
-        </div>
-      </div>
+      {url !== undefined && (
+        <>
+          <div className="dashboard-dropdown-menu">
+            <select>
+              <option>{url}</option>
+            </select>
+          </div>
+          <div className="dashboard-count-container">
+            <div className="dashboard-count">
+              <div className="dashboard-count-title">Total Word Count</div>
+              <div className="dashboard-count-number">
+                {getNumberString(count)}
+              </div>
+            </div>
+            <div className="dashboard-count-message">
+              "WooHoo! You’re doing a good job!"
+            </div>
+          </div>
+        </>
+      )}
       <div className="dashboard-history-container">
         <div className="dashboard-history-title">Word Count History</div>
         <GridComponent
